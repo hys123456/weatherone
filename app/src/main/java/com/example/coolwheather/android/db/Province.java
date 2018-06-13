@@ -15,7 +15,7 @@ public class Province extends DataSupport{
         return id;
     }
 
-    private void setId(int id){
+    public void setId(int id){
         this.id = id;
     }
 
@@ -23,7 +23,7 @@ public class Province extends DataSupport{
         return provinceCode;
     }
 
-    private void setProvinceCode(int provinceCode){
+    public void setProvinceCode(int provinceCode){
         this.provinceCode = provinceCode;
     }
 
@@ -31,7 +31,7 @@ public class Province extends DataSupport{
         return provinceName;
     }
 
-    private void setProvinceName(String provinceName){
+    public void setProvinceName(String provinceName){
         this.provinceName = provinceName;
     }
 
