@@ -2,7 +2,7 @@ package com.example.coolwheather.android;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +42,7 @@ public class ChooseAreaFragment extends Fragment{
     private ListView listView;
 
     private ArrayAdapter<String> adapter;
-    private List<String> datalist = new ArrayList<>();
+    private List<String> dataList = new ArrayList<>();
     private List<Province> provinceList;
     private List<City> cityList;
     private List<County> countyList;
@@ -58,7 +58,7 @@ public class ChooseAreaFragment extends Fragment{
         titleText = (TextView) view.findViewById(R.id.title_text);
         backButton = (Button) view.findViewById(R.id.back_button);
         listView = (ListView) view.findViewById(R.id.list_view);
-        adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,datalist);
+        adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,dataList);
         listView.setAdapter(adapter);
         return view;
     }
@@ -86,6 +86,12 @@ public class ChooseAreaFragment extends Fragment{
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if(currentLevel == LEVEL_COUNTY){
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -107,9 +113,9 @@ public class ChooseAreaFragment extends Fragment{
         backButton.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
         if(provinceList.size()>0){
-            datalist.clear();
+            dataList.clear();
             for(Province province : provinceList){
-                datalist.add(province.getProvinceName());
+                dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -123,11 +129,11 @@ public class ChooseAreaFragment extends Fragment{
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("province=?",String.valueOf(selectedProvince.getId())).find(City.class);
+        cityList = DataSupport.where("provinceid=?",String.valueOf(selectedProvince.getId())).find(City.class);
         if(cityList.size()>0){
-            datalist.clear();
+            dataList.clear();
             for(City city : cityList){
-                datalist.add(city.getCityName());
+                dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -145,9 +151,9 @@ public class ChooseAreaFragment extends Fragment{
         backButton.setVisibility(View.VISIBLE);
         countyList = DataSupport.where("cityid=?",String.valueOf(selectedCity.getId())).find(County.class);
         if(countyList.size()>0){
-            datalist.clear();
+            dataList.clear();
             for(County county : countyList){
-                datalist.add(county.getCountyName());
+                dataList.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -166,7 +172,7 @@ public class ChooseAreaFragment extends Fragment{
         HttpUtil.sendOkHttpRequest(address,new Callback(){
             @Override
             public void onResponse(Call call, Response response)throws IOException{
-                String responseText = response.body().toString();
+                String responseText = response.body().string();
                 boolean result = false;
                 if("province".equals(type)){
                     result = Utility.handleProvinceResponse(responseText);
